@@ -1,25 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Chart from "./components/chart/Chart";
+import SearchBar from "./components/search/SearchBar";
+import Container from "@mui/material/Container";
+import Footer from "./components/footer/Footer";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container maxWidth="xl">
+      <SearchBar />
+      <Chart title={"Hugarty"} />
+      <Chart title={"Pedro"} />
+      <Chart title={"Araujo"} />
+      <Footer />
+    </Container>
   );
-}
+};
 
 export default App;
