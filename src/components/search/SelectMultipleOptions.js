@@ -2,34 +2,42 @@ import * as React from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
+function getEmptyErrorMessage (hasEmptyError) {
+  if (hasEmptyError) {
+    return "Select at least one option.";
+  }
+  return null;
+}
+
 export default function SelectMultipleOptions(props) {
   const {
     value,
     inputValue,
-    setValue,
+    onChange,
     setInputValue,
     options,
     label,
-    placeholder
+    placeholder,
+    selectedItemsEmptyError
   } = props;
+
+  const errorHelperText = getEmptyErrorMessage(selectedItemsEmptyError);
 
   return (
     <Autocomplete
+      multiple
       value={value}
-      onChange={(_e, newValue) => {
-        setValue(newValue);
-      }}
+      onChange={onChange}
       inputValue={inputValue}
       onInputChange={(_e, newInputValue) => {
         setInputValue(newInputValue);
       }}
-      multiple
       id="select-multiple-options"
       options={options}
-      getOptionLabel={(option) => option.title}
+      getOptionLabel={(option) => option.name}
       filterSelectedOptions
       renderInput={(params) => (
-        <TextField {...params} label={label} placeholder={placeholder} />
+        <TextField {...params} helperText={errorHelperText} error={selectedItemsEmptyError} required label={label} placeholder={placeholder} />
       )}
     />
   );

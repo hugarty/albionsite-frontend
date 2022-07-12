@@ -1,88 +1,92 @@
 import ReactECharts from "echarts-for-react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
-const buildSeries = (props) => {
-  return [
-    {
-      name: "asefa",
-      data: [820 - 10, 932 - 10, 901 + 10],
-      type: "line",
+const GRID = { top: 60, right: 50, bottom: 25, left: 100 };
+const LEGEND_TOP = "22px";
+const X_AXYS_TYPE = "category";
+const Y_AXYS_TYPE = "value";
+const SERIES_TYPE = "line";
+const TOOLTIP_TRIGGER = "axis";
+const TOOLTIP_POSITION = [20, 25];
+
+const buildSeries = (items) => {
+  return Object.values(items).map((item) => {
+    const arrayValues = Object.values(item.values).map((value) =>
+      parseFloat(value)
+    );
+
+    return {
+      name: item.name,
+      data: arrayValues,
+      type: SERIES_TYPE,
       smooth: true,
-    },
-    {
-      name: "bbbbbb",
-      data: [820, 232, 801],
-      type: "line",
-      smooth: true,
-    },
-    {
-      name: "ffffff",
-      data: [120 - 10, 132 - 10, 901 + 10],
-      type: "line",
-      smooth: true,
-    },
-    {
-      name: "asdf",
-      data: [820, 932, 701],
-      type: "line",
-      smooth: true,
-    },
-    {
-      name: "xxxxx",
-      data: [820 - 10, 732 - 10, 801 + 20],
-      type: "line",
-      smooth: true,
-    },
-    {
-      name: "zzzz",
-      data: [220, 532, 701],
-      type: "line",
-      smooth: true,
-    },
-  ];
+    };
+  });
 };
 
-const buildLegend = (props) => {
-  return ["asdf", "asefa", "xxxxx", "zzzz", "ffffff", "bbbbbb"];
+const buildLegend = (items) => {
+  return Object.values(items).map((item) => item.name);
 };
 
-const buildCategoryName = (props) => {
-  return ["Mon", "Tue", "Wed"];
+const buildCategoryName = (items) => {
+  return Object.values(items)
+    .map((item) => Object.keys(item.values))
+    .reduce((prev, current) => {
+      if (prev.length <= current.length) {
+        return current;
+      }
+      return prev;
+    }, []);
 };
 
-const getGridTop = (props) => {
-  return 80;
+const getTooltip = (windowWidth) => {
+  const tooltip = { trigger: TOOLTIP_TRIGGER };
+  if (windowWidth < 700) {
+    tooltip.position = TOOLTIP_POSITION;
+  }
+  return tooltip;
 };
 
-const Chart = (props) => {
-  const series = buildSeries(props);
-  const legendData = buildLegend(props);
-  const xAxisCategoryName = buildCategoryName(props);
-  const gridTop = getGridTop(props);
+const isValid = (title, items) => {
+  return title && items;
+};
+
+const Chart = ({ title, items, windowWidth }) => {
+  if (!isValid(title, items)) {
+    return (
+      <Box>
+        <Typography align="center">Loading</Typography>
+      </Box>
+    );
+  }
+
+  const series = buildSeries(items);
+  const legendData = buildLegend(items);
+  const xAxisCategoryName = buildCategoryName(items);
+  const tooltip = getTooltip(windowWidth);
 
   const options = {
     title: {
-      text: props.title,
+      text: title,
     },
     legend: {
       data: legendData,
-      top: "30px",
+      top: LEGEND_TOP,
     },
     series: series,
-    grid: { top: gridTop, right: 10, bottom: 25, left: 50 },
-
+    grid: GRID,
     xAxis: {
-      type: "category",
+      type: X_AXYS_TYPE,
       data: xAxisCategoryName,
     },
     yAxis: {
-      type: "value",
+      type: Y_AXYS_TYPE,
     },
-    tooltip: {
-      trigger: "axis",
-    },
+    tooltip: tooltip,
   };
 
-  return <ReactECharts option={options} />;
+  return <ReactECharts option={options} notMerge />;
 };
 
 export default Chart;

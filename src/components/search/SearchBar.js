@@ -1,77 +1,98 @@
 import * as React from "react";
 import SelectMultipleOptions from "./SelectMultipleOptions";
 import Calendar from "react-calendar";
-import GuildAllianceRadioButtons from "./GuildAllianceRadioButtons";
-import "../../custom-calendar.css";
-
-import LoadingButton from "@mui/lab/LoadingButton";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { filmsA, filmsB } from "./dataFile";
+import GuildAllianceRadioButtons from "./GuildAllianceRadioButtons";
+import "../../custom-calendar.css";
+import LoadingButton from "@mui/lab/LoadingButton";
+import {
+  getSearchUrl,
+  getDateSixDaysAgo,
+  STATE_GUILDS,
+  STATE_ALLIANCES,
+} from "./SearchBarUtils";
 
 const ui = {
-  radioState: {
-    guilds: 0,
-    alliances: 1,
-  },
   data: [
     {
-      radioState: 0,
+      radioState: STATE_GUILDS,
       label: "Select Guilds",
       placeholder: "Albion Guild",
-      options: filmsA,
+      options: [],
     },
     {
-      radioState: 1,
+      radioState: STATE_ALLIANCES,
       label: "Select Alliances",
       placeholder: "Albion Alliance",
-      options: filmsB,
+      options: [],
     },
   ],
 };
 
-export default function SearchBar() {
-  const [loading, setLoading] = React.useState(false);
-  function handleClick() {
-    setLoading(true);
+const dateToday = new Date();
+
+export default function SearchBar({ options, fetchData, setChartsData }) {
+  ui.data[STATE_GUILDS].options = options?.guilds || [];
+  ui.data[STATE_ALLIANCES].options = options?.alliances || [];
+
+  const [radioStateValue, setRadioStateValue] = React.useState(STATE_GUILDS);
+  const [selectedItems, setSelectedItems] = React.useState([]);
+  const [selectedItemsEmptyError, setSelectedItemsEmptyError] =
+    React.useState(false);
+  const [calendarValue, setCalendarValue] = React.useState([
+    getDateSixDaysAgo(),
+    dateToday,
+  ]);
+  const [inputValue, setInputValue] = React.useState("");
+  const [loadingButtonStatus, setLoadingButtonStatus] = React.useState(false);
+
+  const handleRadioChange = (event) => {
+    setRadioStateValue(parseInt(event.target.value));
+    setSelectedItems([]);
+    setInputValue("");
+  };  
+
+  function onChangeSelectMultipleOptions(_e, newValue) {
+    if (newValue?.length !== 0) {
+      setSelectedItemsEmptyError(false);
+    }
+    setSelectedItems(newValue);
   }
 
-  const [radioStateValue, setRadioStateValue] = React.useState(
-    ui.radioState.guilds
-  );
-
-  const [value, setValue] = React.useState([]);
-  const [inputValue, setInputValue] = React.useState('');
-
-  const handleChange = (event) => {
-    setRadioStateValue(event.target.value);
-    setValue([]);
-    setInputValue('');
-  };
+  function handleSearch() {
+    if (selectedItems.length === 0) {
+      setSelectedItemsEmptyError(true);
+      return;
+    }
+    const URL = getSearchUrl(selectedItems, calendarValue, radioStateValue);
+    fetchData(URL, setChartsData, setLoadingButtonStatus);
+  }
 
   const uiCurrentValues = ui.data[radioStateValue];
-
   return (
     <Box sx={{ mt: 0, mb: 4 }}>
       <Grid container columnSpacing={2}>
         <Grid item md={8} sm={12} xs={12}>
           <GuildAllianceRadioButtons
             radioValue={radioStateValue}
-            handleChange={handleChange}
+            handleChange={handleRadioChange}
           />
           <SelectMultipleOptions
-            value={value}
-            setValue={setValue}
+            value={selectedItems}
+            setValue={setSelectedItems}
+            onChange={onChangeSelectMultipleOptions}
             inputValue={inputValue}
             setInputValue={setInputValue}
             options={uiCurrentValues.options}
             label={uiCurrentValues.label}
             placeholder={uiCurrentValues.placeholder}
+            selectedItemsEmptyError={selectedItemsEmptyError}
           />
           <Box sx={{ mt: 1 }}>
             <LoadingButton
-              onClick={handleClick}
-              loading={loading}
+              onClick={handleSearch}
+              loading={loadingButtonStatus}
               variant="outlined"
               fullWidth
             >
@@ -83,9 +104,11 @@ export default function SearchBar() {
           <Calendar
             selectRange
             returnValue={"range"}
-            onChange={(value, _event) => {
-              console.log(value);
-            }}
+            allowPartialRange
+            maxDate={dateToday}
+            defaultActiveStartDate={dateToday}
+            onChange={setCalendarValue}
+            value={calendarValue}
           />
         </Grid>
       </Grid>
