@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 
 const GRID = { top: 60, right: 50, bottom: 25, left: 100 };
 const LEGEND_TOP = "22px";
+const LEGEND_TYPE = "scroll";
 const X_AXYS_TYPE = "category";
 const Y_AXYS_TYPE = "value";
 const SERIES_TYPE = "line";
@@ -73,6 +74,7 @@ const Chart = ({ title, items, windowWidth }) => {
     legend: {
       data: legendData,
       top: LEGEND_TOP,
+      type: LEGEND_TYPE
     },
     series: series,
     grid: GRID,
